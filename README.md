@@ -23,9 +23,9 @@ Assez parler, passons à l'installation !
 
 ### Installation des outils nécessaires
 
-Je vais utiliser [`**Angular CLI**`](https://cli.angular.io/) pour créer mon application plus facilement.
+Je vais utiliser **[`Angular CLI`](https://cli.angular.io/)** pour créer mon application plus facilement.
 
-D'abord, je commence par installer [`**NodeJS**`](https://nodejs.org/en/), qui inclus [`**npm**`](https://www.npmjs.com/) :
+D'abord, je commence par installer **[`NodeJS`](https://nodejs.org/en/)**, qui inclus **[`npm`](https://www.npmjs.com/)** :
 ```bash
 # On va installer la dernière version de NodeJS v15
 curl -fsSL https://deb.nodesource.com/setup_15.x | sudo -E bash -
