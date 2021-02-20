@@ -56,3 +56,27 @@ Cette interface nous propose plusieurs options dont nous aurons besoin ultérieu
 On peut donc passer à la création de notre première application Angular !
 
 ### Création de la première application
+
+Nous allons enfin pouvoir créer notre application ; mais avant ça, jetons un œil aux deux flags importants que nous allons utiliser :
+- `--style=scss` : on va simplifier la rédaction de notre *stylesheet* en incluant des fichiers en `scss` et non `css`. De plus, en vue de l'intégration de *bootstrap* à ce projet, l'utilisation de `scss` nous facilitera la tâche.
+- `--skip-tests=true` : on ne crée pas de fichiers de tests unitaires pour l'instant, nous y reviendrons une fois plus à l'aise avec le framework.
+
+Ce qui nous donne la commande :
+```bash
+ng new learning-angular --style=scss --skip-tests=true
+```
+
+On peut se rendre dans notre dossier `learning-angular` fraîchement créé pour y installer deux packages supplémentaires :
+```bash
+# On fait attention à ne pas inclure le flag -g ici : les packages doivent être installés localement (--save).
+npm install bootstrap@latest --save
+
+# Nous installons ce package pour un cours ultérieur.
+npm install jquery@latest --save
+```
+
+On lance `ng serve` dans notre dossier, puis nous rendons à l'adresse `localhost:4200`. Voici ce qu'on obtient :
+
+![](img/first_serve.png)
+
+Tout est donc fonctionnel, nous allons alors commencer à la modifier !
