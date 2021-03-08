@@ -10,6 +10,9 @@ J'utilise comme support les cours d'**OpenClassrooms**, disponibles à [cette ad
   - [Description du framework](#description-du-framework)
   - [Installation des outils nécessaires](#installation-des-outils-nécessaires)
   - [Création de la première application](#création-de-la-première-application)
+- [Création du premier **Component**](#création-du-premier-component)
+  - [Construction du Component**](#construction-du-component)
+  - [Test du Component](#test-du-component)
 
 ## Introduction à **Angular**
 
@@ -80,3 +83,32 @@ On lance `ng serve` dans notre dossier, puis nous rendons à l'adresse `localhos
 ![](img/first_serve.png)
 
 Tout est donc fonctionnel, nous allons alors commencer à la modifier !
+
+## Création du premier Component
+
+Je vais maintenant créer mon tout premier *Component* avec la commande `ng generate component <name>`.
+
+### Construction du Component
+
+Notre *component* est donc créé dans un sous dossier dans [`src/app/`](learning_angular/src/app/first/). Il est constitué de 3 fichiers :
+- Un fichier *template* : [`<name>.component.html`](learning_angular/src/app/first/first.component.html)
+- Un fichier de style : [`<name>.component.scss`](learning_angular/src/app/first/first.component.scss)
+- Un fichier *component* : [`<name>.component.ts`](learning_angular/src/app/first/first.component.ts)
+
+Également, le fichier [`app.module.ts`](learning_angular/src/app/app.module.ts) est modifié pour que notre nouveau *component* soit disponible.
+
+### Test du Component
+
+On commence par créer un back-up du fichier `app.component.html`, puis nous le modifions pour qu'il ne contienne que cette ligne :
+```html
+<app-first></app-first>
+```
+
+> *first* est le nom choisi pour ce premier component (très original).
+
+On se rend ensuite à l'adresse de notre application dans notre navigateur, où la phrase suivante doit apparaître:
+```
+first works!
+```
+
+Notre premier *component* est donc fonctionnel !
