@@ -11,8 +11,13 @@ J'utilise comme support les cours d'**OpenClassrooms**, disponibles à [cette ad
   - [Installation des outils nécessaires](#installation-des-outils-nécessaires)
   - [Création de la première application](#création-de-la-première-application)
 - [Création du premier **Component**](#création-du-premier-component)
-  - [Construction du Component**](#construction-du-component)
+  - [Construction du Component](#construction-du-component)
   - [Test du Component](#test-du-component)
+- [Réalisation du premier projet](#réalisation-du-premier-projet)
+  - [Objectif : créer un blog](#objectifs)
+  - [Réalisation](#réalisation)
+  - [Résultat](#résultat)
+
 
 ## Introduction à **Angular**
 
@@ -90,12 +95,12 @@ Je vais maintenant créer mon tout premier *Component* avec la commande `ng gene
 
 ### Construction du Component
 
-Notre *component* est donc créé dans un sous dossier dans [`src/app/`](learning_angular/src/app/first/). Il est constitué de 3 fichiers :
-- Un fichier *template* : [`<name>.component.html`](learning_angular/src/app/first/first.component.html)
-- Un fichier de style : [`<name>.component.scss`](learning_angular/src/app/first/first.component.scss)
-- Un fichier *component* : [`<name>.component.ts`](learning_angular/src/app/first/first.component.ts)
+Notre *component* est donc créé dans un sous dossier dans `src/app/`. Il est constitué de 3 fichiers :
+- Un fichier *template* : `<name>.component.html`
+- Un fichier de style : `<name>.component.scss`
+- Un fichier *component* : `<name>.component.ts`
 
-Également, le fichier [`app.module.ts`](learning_angular/src/app/app.module.ts) est modifié pour que notre nouveau *component* soit disponible.
+Également, le fichier `app.module.ts` est modifié pour que notre nouveau *component* soit disponible.
 
 ### Test du Component
 
@@ -112,3 +117,139 @@ first works!
 ```
 
 Notre premier *component* est donc fonctionnel !
+
+
+## Réalisation du premier projet
+
+Nous allons maintenant réaliser notre premier projet avec ce que nous avons vu.
+
+### Objectifs
+
+L'objectif est de créer une ébauche de blog, qui affiche des posts constitués :
+- d'un **Titre** de type *string*,
+- d'un **Contenu** de type *string*,
+- d'un nombre de **"likes"** de type *number*,
+- d'une **date** de création de type *Date*.
+
+L'array sera créé au préalable dans `blog/src/app/app.component.ts`.
+
+### Réalisation
+
+On commence par créer un nouveau projet Angular : `ng new blog --style=scss --skip-tests=true`
+On y intègre directement *bootstrap* : `npm install bootstrap@3.3.7`
+
+> L'utilisation de bootstrap 3.3.7 est propre à ce projet, pour suivre les exemples du cours en matière de mise en page
+
+Puis nous créons notre *component* **Post** : `ng generate component post`
+
+> Ce *component* servira à l'affichage de chaque post. Il sera appelé avec la directive `*ngFor`.
+
+Nous commençons par générer notre *array* dans `app.component.ts` :
+```ts
+posts = [
+  {
+    title: 'toto',
+    content: '[...]',
+    loveIts: 0,
+    created_at: new Date()
+  },
+  {
+    title: 'titi',
+    content: '[...]',
+    loveIts: 0,
+    created_at: new Date()
+  },
+  // [...]
+];
+```
+
+Puis nous modifions `post.component.ts` pour y intégrer ces fonctions :
+```ts
+@Input() postTitle!: string;
+@Input() postContent!: string;
+@Input() postLove!: number;
+@Input() postDate!: Date;
+
+//[...]
+
+getColor() {
+  if (this.postLove > 0) {
+    return 'green';
+  } else if (this.postLove < 0) {
+    return 'red';
+  }
+}
+
+love() {
+ this.postLove += 1;
+}
+
+hate() {
+  this.postLove -= 1;
+}
+```
+
+> Ici, `getColor()` va nous permettre de déterminer la couleur à appliquer à notre texte plus tard ; un article aimé sera vert, et à l'inverse, un article qui n'est pas apprécié sera rouge.
+
+Maintenant, il faut configurer notre *template* `post.component.ts`. Rappelons qu'elle doit pouvoir s’exécuter autant de fois qu'il y a d'article.
+```html
+<li [ngClass]="{'list-group-item': true,
+                'list-group-item-success': postLove > 0,
+                'list-group-item-danger': postLove < 0}">
+  <div class="pull-right">
+    <h3 class="text-muted"><em>{{ postDate | date: 'dd/MM/yyyy, hh:mm a' }}</em></h3>
+  </div>
+  <h2 [ngStyle]="{color: getColor()}"><strong>{{ postTitle }}</strong></h2>
+  <p [ngStyle]="{color: getColor()}">{{ postContent }}</p>
+  <div class="btn-toolbar">
+      <button class="btn btn-success "
+              (click)="love()">Love it!</button>
+      <button class="btn btn-danger "
+              (click)="hate()">Don't love it!</button>
+  </div>
+
+</li>
+```
+
+Précisons quelques points :
+- Nous créons donc un élément d'une liste (`<li>`) auquel nous appliquons une **classe dynamique** en fonction de `postLove` (le nombre de like). L’élément sera donc :
+  - **Blanc** : même nombre de *likes* et de *dislikes*.
+  - **Rouge** : Si le nombre de *dislikes* est supérieur au nombre de *likes* (article non apprécié).
+  - **Vert**  : Si le nombre de *likes* est supérieur au nombre de *dislikes* (article apprécié).
+- Nous affichons la **date** en haut à droite à l'aide d'une `<div>` avec la classe `pull-right`. Le texte sera en italique (`<em>`) et de couleur grise (classe `text-muted`). Nous formatons également cette date grâce à un `DatePipe` pour la rendre plus agréable visuellement.
+- L'affichage du **titre** (en gras) et du **contenu** varieront en fonction du nombre de *likes* également grâce à la fonction `getColor()`.
+- Enfin, on met en place 2 **boutons** :
+  - Le premier invoque la fonction `love()` afin d'augmenter le nombre de *likes*
+  - Le deuxième invoque la fonction `hate()` afin de diminuer le nombre de *likes*
+
+Il ne nous reste plus qu'à adapter notre *template* `app.component.html` pour créer notre blog :
+```html
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <h1>Mon Blog</h1>
+      <ul class="list-group">
+        <app-post  *ngFor="let post of posts"
+                    [postTitle]="post.title"
+                    [postContent]="post.content"
+                    [postDate]="post.created_at"
+                    [postLove]="post.loveIts"></app-post>
+      </ul>
+    </div>
+  </div>
+</div>
+```
+
+On remarque l'utilisation de la directive `*ngFor` qui permet de récupérer, un par un, les éléments d'un tableau. On peut donc facilement les faire passer à notre *post-component*.
+
+Nous pouvons admirer le résultat maintenant !
+
+### Résultat
+
+Ci-dessous, une capture d'écran de mon blog fraîchement créé :
+
+![](img/blog_serve.png)
+
+Comme expliquer durant la réalisation, les couleurs sont très explicites : les articles appréciés sont donc **toto** et **tete**, contrairement à **tata** et **tutu**. L'article **titi** reste neutre, en revanche.
+
+L'intégralité de ce projet se trouve dans le dossier `blog/`.
