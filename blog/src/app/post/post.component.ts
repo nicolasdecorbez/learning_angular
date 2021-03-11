@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { PostService } from "../service/post.service";
 
 @Component({
   selector: 'app-post',
@@ -11,10 +12,20 @@ export class PostComponent implements OnInit {
   @Input() postContent!: string;
   @Input() postDate!: Date;
   @Input() postLove!: number;
+  @Input() index!: number;
+  @Input() id!: number;
 
-  constructor() { }
+  constructor(private postService: PostService) { }
 
   ngOnInit(): void {
+  }
+
+  love() {
+    this.postService.addLike(this.index);
+  }
+
+  hate () {
+    this.postService.remLike(this.index);
   }
 
   getColor() {
@@ -23,14 +34,6 @@ export class PostComponent implements OnInit {
     } else if (this.postLove < 0) {
       return 'red';
     }
-  }
-
-  love() {
-   this.postLove += 1;
-  }
-
-  hate() {
-    this.postLove -= 1;
   }
 
 }

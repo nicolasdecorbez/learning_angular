@@ -4,7 +4,7 @@
   <div class="pull-right">
     <h3 class="text-muted text-italic"><em>{{ postDate | date: 'dd/MM/yyyy, hh:mm a' }}</em></h3>
   </div>
-  <h2 [ngStyle]="{color: getColor()}"><strong>{{ postTitle }}</strong></h2>
+  <h2 [ngStyle]="{color: getColor()}"><strong><a [routerLink]="[id]">{{ postTitle }}</a></strong></h2>
   <p [ngStyle]="{color: getColor()}">{{ postContent }}</p>
   <div class="btn-toolbar">
       <button class="btn btn-success "
