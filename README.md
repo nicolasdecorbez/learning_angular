@@ -17,6 +17,10 @@ J'utilise comme support les cours d'**OpenClassrooms**, disponibles à [cette ad
   - [Objectif : créer un blog](#objectifs)
   - [Réalisation](#réalisation)
   - [Résultat](#résultat)
+- [Amélioration du blog](#amélioration-du-blog)
+  - [Création de services](#création-de-services)
+  - [Gestion des routes](#gestion-des-routes)
+  - [Blog final](#blog-final)
 
 
 ## Introduction à **Angular**
@@ -253,3 +257,175 @@ Ci-dessous, une capture d'écran de mon blog fraîchement créé :
 Comme expliquer durant la réalisation, les couleurs sont très explicites : les articles appréciés sont donc **toto** et **tete**, contrairement à **tata** et **tutu**. L'article **titi** reste neutre, en revanche.
 
 L'intégralité de ce projet se trouve dans le dossier `blog/`.
+
+## Amélioration du Blog
+
+Suite à la réalisation de ce projet, j'ai décidé de l'améliorer afin de créer ma première *Single Page Application* en métant en place des **routes**. Aussi, j'ai décidé (afin d'obtenir un code plus clair) d'explorer les **services**. Avec ces derniers, je mettrai en place une émulation d'authentification afin de pouvoir accéder au Blog.
+
+### Création de services
+
+Pour mes besoins, j'ai prévu de créer 3 services différents :
+- un `post.service` : son but est de stocker tous les posts du blog, mais aussi de déclarer des fonctions comme `addLike()` et `remLike()` qui ont pour but de gérer les likes.
+- un `auth.service` : l'objectif est de mettre en place le statut de l'utilisateur lors du lancement de l'application (`isAuth = false`) puis de créer une fonction `login` et `logout`.
+- un `auth-guard.service` : dans ce service, nous allons implémenter la méthode `CanActivate` afin de gérer si un utilisateur non-identifié à le droit ou nous d'accéder à un component.
+
+> L'intégralité des services créés sont disponibles dans `blog/src/app/service`.
+
+Voyons chaque service plus en détail maintenant.
+
+#### `post.service`
+
+```js
+export class PostService {
+  posts = [                  // Array contenant nos différents posts
+    {
+      id: 1,
+      title: 'Post 1',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      loveIts: 0,
+      created_at: new Date()
+    },
+    // [...]
+  ];
+
+  addLike(i: number) {        // fonction pour ajouter un like
+    this.posts[i].loveIts += 1;
+  }
+
+  remLike(i: number) {        // fonction pour retirer un like
+    this.posts[i].loveIts -= 1;
+  }
+
+  getPostById(id: number) {   // permet de renvoyer un post entier à partir de son ID
+    const post = this.posts.find(
+      (s) => {
+        return s.id === id;
+      }
+    );
+    return post;
+  }
+
+}
+```
+
+Petite explication des fonctions ci-dessus :
+- `addLike()` et `remLike()`: ajoute ou retire un like au post associé à l'`id` rentré en paramètre.
+- `getPostById()` : renvoie l'intégralité du post associé à l'`id`.
+
+#### `auth.service`
+
+```js
+export class AuthService {
+  isAuth = false;
+
+  signIn() {
+    return new Promise(
+      (resolve, reject) => {
+        setTimeout(
+          () => {
+              this.isAuth = true;
+              resolve(true);
+          }, 2000
+        );
+      }
+    );
+  }
+
+  signOut() {
+    this.isAuth = false;
+  }
+}
+```
+
+- `signIn()` : fonction de *login*, simulée ou l'authentification est remplacée par un `setTimeout(), 2000` dans un premier temps.
+- `signOut()` : fonction de *logout*
+
+#### `auth-guard.service`
+
+```js
+import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, Router } from "@angular/router";
+import { Observable } from "rxjs/Observable";
+import { AuthService } from "./auth.service";
+import { Injectable } from "@angular/core";
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+
+  constructor(private authService: AuthService,
+              private router: Router) { }
+
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
+      if (this.authService.isAuth !== true) {
+        this.router.navigate(['/auth']);
+      }
+      return true;
+    }
+}
+```
+
+Ce service est un peu plus complexe que les deux derniers : il importe plusieurs méthodes comme `CanActivate` pour gérer l'accès à certains components, ou encore `Injectable` afin d'injecter un autre service (`auth.service`) dans ce dernier.
+
+Revenons en détail sur l'implémentation de `CanActivate` -> cette interface va s’exécuter avant qu'un utilisateur essaye d'accéder à une route spécifique :
+- S'il n'est pas identifié (`this.authService.isAuth !== true`) alors on le redirige vers `/auth`.
+- On renvoie `true` pour permettre la redirection (vers `/auth` ou vers le component voulu).
+
+Maintenant, configurons nos routes afin de gérer les redirections de notre *SPA*.
+
+### Gestion des routes
+
+Nous allons maintenant modifier le fichier `blog/src/app/app-routing-module.ts` afin de gérer nos routes :
+```ts
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+
+import { AuthGuard } from "./service/auth-guard.service";
+import { AppComponent } from './app.component';
+import { PostComponent } from './post/post.component';
+import { FourOhFourComponent } from './four-oh-four/four-oh-four.component';
+import { AuthComponent } from './auth/auth.component';
+import { SinglePostComponent } from './single-post/single-post.component';
+import { BlogViewComponent } from './blog-view/blog-view.component';
+
+const routes: Routes = [
+  { path: 'posts', canActivate: [AuthGuard], component: BlogViewComponent },
+  { path: 'posts/:id', canActivate: [AuthGuard], component: SinglePostComponent },
+  { path: 'auth', component: AuthComponent },
+  { path: '', canActivate: [AuthGuard], component: BlogViewComponent },
+  { path: 'not-found', component: FourOhFourComponent },
+  { path: '**', redirectTo: 'not-found' }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+```
+
+On commence par importer la totalité de nos components, ainsi que notre *guard*.
+
+Nos routes sont configurées de la sorte :
+- path de base (`localhost:4200`) : On applique notre *guard*, et on redirige vers `BlogViewComponent` (affichage de notre blog)
+- path `posts` : similaire au path de base.
+- path `posts/:id` : On applique notre *guard*, et on redirige vers `SinglePostComponent` (affichage d'un post précis, précisé par son `id`).
+- path `auth` : renvoie `AuthComponent` afin de gérer l'authentification.
+
+En plus, nous créons une route `not-found` afin d'appeler notre component `FourOhFour`, qui renvoie une erreur *404 Not Found*. Nous appellerons cette route pour chaque autre *path* non déclaré (`path: '**'`).
+
+### Blog final
+
+Ci-dessous, quelques screenshots de mon Blog :
+
+Page d'authentification :
+![](img/blog_auth.png)
+
+Page principale :
+![](img/blog_main.png)
+
+Page d'un seul post :
+![](img/blog_post.png)
+
+Erreur 404 :
+![](img/blog_404.png)

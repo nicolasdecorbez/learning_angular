@@ -1,5 +1,5 @@
 export class PostService {
-  posts = [
+  posts = [                                                                     // Array contenant nos différents posts
     {
       id: 1,
       title: 'Post 1',
@@ -37,15 +37,15 @@ export class PostService {
     }
   ];
 
-  addLike(i: number) {
+  addLike(i: number) {                                                          // fonction pour ajouter des likes
     this.posts[i].loveIts += 1;
   }
 
-  remLike(i: number) {
+  remLike(i: number) {                                                          // fonction pour retirer des likes
     this.posts[i].loveIts -= 1;
   }
 
-  getPostById(id: number) {
+  getPostById(id: number) {                                                     // permet de renvoyer un post entier à partir de son ID
     const post = this.posts.find(
       (s) => {
         return s.id === id;
